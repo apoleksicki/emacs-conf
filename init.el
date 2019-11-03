@@ -10,15 +10,14 @@
   '("melpa" . "http://melpa.org/packages/")
   '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 
-(add-to-list 'load-path "~/.emacs.d/site/neotree")
-(require 'neotree)
+;;;(require 'neotree)
 
-(add-to-list 'load-path "~/.emacs.d/site/autopair")
+(add-to-list 'load-path "~/.emacs.d/elpa/autopair-20160304.1237")
+(add-to-list 'load-path "~/.emacs.d/site/better-defaults")
 (require 'autopair)
+(require 'better-defaults)
 (autopair-global-mode)
 
-(add-to-list 'load-path "~/.emacs.d/site/jinja2-mode")
-(require 'jinja2-mode)
 
 (package-initialize)
 (when (not package-archive-contents)
@@ -35,7 +34,7 @@
 
 (global-hl-line-mode 1)
 ;; (global-linum-mode t)
-(global-undo-tree-mode 0)
+;; (global-undo-tree-mode 0)
 
 (add-hook 'text-mode-hook 'visual-line-mode)
 (add-hook 'text-mode-hook 'flyspell-mode)
@@ -186,23 +185,23 @@
 ;; ;;   (add-to-list 'flymake-allowed-file-name-masks
 ;;                ;; '("\\.py\\'" flymake-pylint-init)))
 
-;; (global-set-key (kbd "M-1") 'windmove-left)
-;; (global-set-key (kbd "M-2") 'windmove-right)
-;; (global-set-key (kbd "M-3") 'windmove-up)
-;; (global-set-key (kbd "M-4") 'windmove-down)
-;; (global-set-key (kbd "C-c o") 'occur)
-;; ;; (set-face-underline-p 1)
-;; (global-set-key [f8] 'neotree-toggle)
-;; (setq neo-smart-open t)
+(global-set-key (kbd "M-1") 'windmove-left)
+(global-set-key (kbd "M-2") 'windmove-right)
+(global-set-key (kbd "M-3") 'windmove-up)
+(global-set-key (kbd "M-4") 'windmove-down)
+(global-set-key (kbd "C-c o") 'occur)
+;; (set-face-underline-p 1)
+(global-set-key [f8] 'neotree-toggle)
+(setq neo-smart-open t)
 
 
-;; ;; Magit configuration
-;; (global-set-key (kbd "C-x g") 'magit-status)
-;; (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
-;; (global-set-key (kbd "C-x M-b") 'magit-blame)
+;; Magit configuration
+(global-set-key (kbd "C-x g") 'magit-status)
+(global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
+(global-set-key (kbd "C-x M-b") 'magit-blame)
 
 
-;; ;; Elpy configuration
+;; ;; elpy configuration
 ;; (global-set-key (kbd "M-*") 'pop-tag-mark)
 
 ;; (add-hook 'after-init-hook #'global-flycheck-mode)
