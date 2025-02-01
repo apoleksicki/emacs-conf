@@ -10,15 +10,25 @@
   '("melpa" . "http://melpa.org/packages/")
   '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 
-;;;(require 'neotree)
+(require 'neotree)
+(set-face-attribute 'default nil :height 150)
 
 (add-to-list 'load-path "~/.emacs.d/elpa/autopair-20160304.1237")
 (add-to-list 'load-path "~/.emacs.d/site/better-defaults")
+(add-to-list 'load-path "~/.emacs.d/site/apo")
+(add-to-list 'load-path "~/.emacs.d/site/apo/typewritter-mode")
+(add-to-list 'load-path "~/.emacs.d/site/hy-mode")
 (require 'autopair)
 (require 'better-defaults)
+(require 'elpy)
+(require 'traad)
+(require 'pyenv-mode)
+(require 'blog)
+(require 'hy-mode)
+(require 'typewritter)
 (autopair-global-mode)
 
-
+(load custom-file)
 (package-initialize)
 (when (not package-archive-contents)
   (package-refresh-contents))
@@ -52,8 +62,20 @@
 (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
 (global-set-key (kbd "C-x M-b") 'magit-blame)
 
-;; (require 'evil)
-;; ;; (evil-mode 1)
+(require 'evil)
+(evil-mode 1)
+
+;; evil config
+(evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
+(evil-define-key 'normal neotree-mode-map (kbd "SPC") 'neotree-quick-look)
+(evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+(evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
+(evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
+(evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
+(evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
+(evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
+(evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle)
+
 ;; (global-undo-tree-mode 0)
 ;; ;; BASIC CUSTOMIZATION
 ;; ;; --------------------------------------
@@ -76,28 +98,9 @@
  '(custom-safe-themes
    (quote
     ("b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" default)))
- '(elpy-modules
-   (quote
-    (elpy-module-company elpy-module-eldoc elpy-module-pyvenv elpy-module-highlight-indentation elpy-module-yasnippet elpy-module-sane-defaults)))
- '(elpy-project-root-finder-functions
-   (quote
-    (elpy-project-find-projectile-root elpy-project-find-python-root elpy-project-find-git-root elpy-project-find-hg-root elpy-project-find-svn-root)))
- '(elpy-rpc-backend "rope")
- '(elpy-syntax-check-command "mypy")
- '(elpy-test-pytest-runner-command (quote ("py.test" "-s")))
- '(elpy-test-runner (quote elpy-test-pytest-runner))
  '(fci-rule-color "#ECEFF1")
  '(flycheck-pycheckers-checkers (quote (pylint pep8 flake8 mypy3)))
  '(hl-sexp-background-color "#efebe9")
- '(package-selected-packages
-   (quote
-    (darkroom importmagic traad flycheck-pycheckers visual-fill-column flycheck-pylint flycheck-pyflakes yaml-mode magit material-theme json-mode flycheck evil-text-object-python elpy better-defaults)))
- '(python-check-command "flake8")
- '(python-indent-trigger-commands
-   (quote
-    (indent-for-tab-command yas-expand yas/expand newline)))
- '(python-shell-interpreter "ipython")
- '(python-shell-interpreter-args "--simple-prompt")
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    (quote
@@ -124,7 +127,6 @@
 (add-hook 'python-mode-hook 'flyspell-prog-mode)
 ;;     python-shell-interpreter-args "--simple-prompt -i")
 
-(setq python-shell-interpreter "ipython")
 
 
 (delete-selection-mode nil)
