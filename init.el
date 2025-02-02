@@ -76,6 +76,40 @@
 (use-package pyenv-mode)
 (use-package hy-mode)
 
+(use-package lsp-mode
+  :hook ((python-mode . lsp))
+  :commands lsp
+  :init
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-enable-snippet nil)  ;; Disable snippets (optional)
+  :config
+  (lsp-enable-which-key-integration t))
+
+;; Enable Ruff LSP (for linting and formatting)
+(use-package lsp-ruff
+  :ensure nil  ;; Do not try to install it from a package repository.
+  :after lsp-mode
+  :hook (python-mode . (lambda ()
+                         ;; If you need to require a file, check that it exists.
+                         ;; For now, we assume lsp-mode supports ruff if you set the variable.
+                         (lsp)))
+  :config
+  (setq lsp-ruff-lsp-server-command '("ruff-lsp")))
+
+;; Enable Python LSP Server (Pylsp) with Rope
+(use-package lsp-pylsp
+  :ensure nil  ;; Prevent use-package from trying to install a package that doesn’t exist.
+  :after lsp-mode
+  :config
+  (setq lsp-pylsp-plugins-ruff-enabled t
+        lsp-pylsp-plugins-ruff-format t
+        lsp-pylsp-plugins-mypy-enabled t
+        lsp-pylsp-plugins-black-enabled t
+        lsp-pylsp-plugins-rope-completion-enabled t
+        lsp-pylsp-plugins-rope-refactoring-enabled t))
+
+
+
 ;; --------------------------------------
 ;; Keybindings
 ;; --------------------------------------
