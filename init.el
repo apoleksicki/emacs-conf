@@ -1,43 +1,31 @@
-;; init.el --- Emacs configuration
+;; init.el --- Optimized Emacs Configuration
 
 ;; --------------------------------------
-;; Package Management
+;; Package Management (Optimized)
 ;; --------------------------------------
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("elpy" . "http://jorgenschaefer.github.io/packages/") t)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
+
 (unless package-archive-contents
   (package-refresh-contents))
 
-;; Define and install packages
-(defvar my-packages
-  '(better-defaults
-    material-theme
-    neotree
-    autopair
-    elpy
-    pyenv-mode
-    hy-mode
-    evil
-    flycheck
-    flycheck-pycheckers))
-
-(dolist (package my-packages)
-  (unless (package-installed-p package)
-    (package-install package)))
+;; Install use-package if not present
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ;; --------------------------------------
-;; Load Paths (for custom files/packages)
+;; Load Paths (Auto-Loading)
 ;; --------------------------------------
 
-;; Paths for local/custom packages
-(add-to-list 'load-path "~/.emacs.d/elpa/autopair-20160304.1237")
-(add-to-list 'load-path "~/.emacs.d/site/better-defaults")
-(add-to-list 'load-path "~/.emacs.d/site/apo")   ; For blog.el
-(add-to-list 'load-path "~/.emacs.d/site/hy-mode")
-(add-to-list 'load-path "~/.emacs.d/site/flymake-mypy")
+(let ((default-directory "~/.emacs.d/site/"))
+  (normal-top-level-add-subdirs-to-load-path))
 
 ;; --------------------------------------
 ;; Basic Customization
@@ -46,12 +34,47 @@
 (set-face-attribute 'default nil :height 150)  ; Larger font
 (global-hl-line-mode 1)                        ; Highlight current line
 (delete-selection-mode nil)                    ; Don't delete selected text on type
-(autopair-global-mode)                         ; Auto-pair brackets/quotes
+(electric-pair-mode 1)                         ; Auto-pair brackets/quotes (replaces autopair)
 
 ;; Safely load custom-file
 (setq custom-file "~/.emacs.d/custom.el")
 (when (file-exists-p custom-file)
   (load custom-file))
+
+;; --------------------------------------
+;; Package Configuration (Using use-package)
+;; --------------------------------------
+
+(use-package better-defaults)
+
+(use-package neotree
+  :bind ("<f8>" . neotree-toggle)
+  :config
+  (setq neo-smart-open t))
+
+(setq evil-want-keybinding nil)  ; Critical fix for evil-collection
+
+(use-package evil
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :config (evil-collection-init))
+
+(use-package elpy
+  :init (elpy-enable)
+  :bind ("M-*" . pop-tag-mark))
+
+(use-package flycheck
+  :init (global-flycheck-mode))
+
+(use-package flycheck-pycheckers
+  :after flycheck
+  :config (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
+
+(use-package pyenv-mode)
+(use-package hy-mode)
 
 ;; --------------------------------------
 ;; Keybindings
@@ -63,57 +86,11 @@
 (global-set-key (kbd "M-3") 'windmove-up)
 (global-set-key (kbd "M-4") 'windmove-down)
 
-;; Neotree (file explorer)
-(global-set-key [f8] 'neotree-toggle)
-(setq neo-smart-open t)  ; Auto-open files on selection
-
 ;; Magit (Git integration)
-(global-set-key (kbd "C-x g") 'magit-status)
-(global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
-(global-set-key (kbd "C-x M-b") 'magit-blame)
-
-;; Occur (search within buffer)
-(global-set-key (kbd "C-c o") 'occur)
-
-;; --------------------------------------
-;; Mode Configuration
-;; --------------------------------------
-
-;; Evil Mode (Vim keybindings) - LOAD FIRST!
-(require 'evil)
-(evil-mode 1)
-
-;; Neotree (file explorer)
-(require 'neotree)
-(evil-define-key 'normal neotree-mode-map
-  (kbd "TAB") 'neotree-enter
-  (kbd "SPC") 'neotree-quick-look
-  (kbd "q")   'neotree-hide
-  (kbd "RET") 'neotree-enter
-  (kbd "g")   'neotree-refresh
-  (kbd "n")   'neotree-next-line
-  (kbd "p")   'neotree-previous-line
-  (kbd "A")   'neotree-stretch-toggle
-  (kbd "H")   'neotree-hidden-file-toggle)
-
-;; Elpy (Python IDE)
-(require 'elpy)
-(elpy-enable)
-(global-set-key (kbd "M-*") 'pop-tag-mark)  ; Jump back from definitions
-
-;; Flycheck (syntax checking)
-(require 'flycheck)
-(add-to-list 'flycheck-disabled-checkers 'python-flake8)
-(add-to-list 'flycheck-disabled-checkers 'python-pylint)
-(require 'flycheck-pycheckers)
-(global-flycheck-mode 1)
-(with-eval-after-load 'flycheck
-  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
-
-;; Text/Programming Modes
-(add-hook 'text-mode-hook 'visual-line-mode)  ; Soft wrap lines
-(add-hook 'text-mode-hook 'flyspell-mode)     ; Spell-check in text
-(add-hook 'python-mode-hook 'flyspell-prog-mode)  ; Spell-check strings/comments
+(use-package magit
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch-popup)
+         ("C-x M-b" . magit-blame)))
 
 ;; --------------------------------------
 ;; Custom Functions
@@ -133,26 +110,9 @@
     (call-interactively 'inner-open-project)))
 
 ;; --------------------------------------
-;; Load Custom Files and Modes
-;; --------------------------------------
-
-;; Load blog.el (custom file)
-(load "blog")  ; Loads ~/.emacs.d/site/apo/blog.el
-
-;; Enable other modes
-(require 'hy-mode)     ; Hy-lang support
-(require 'pyenv-mode)  ; Python virtualenv integration
-
-;; Enable better-defaults
-(require 'better-defaults)
-
-;; --------------------------------------
 ;; Final Settings
 ;; --------------------------------------
 
 (put 'downcase-region 'disabled nil)  ; Enable case commands
 (put 'upcase-region 'disabled nil)
 
-;; --------------------------------------
-;; End of Configuration
-;; --------------------------------------
