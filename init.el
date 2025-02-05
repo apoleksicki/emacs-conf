@@ -35,6 +35,7 @@
 (global-hl-line-mode 1)                        ; Highlight current line
 (delete-selection-mode nil)                    ; Don't delete selected text on type
 (electric-pair-mode 1)                         ; Auto-pair brackets/quotes (replaces autopair)
+(global-display-line-numbers-mode 1)           ; Line numbers
 
 ;; Safely load custom-file
 (setq custom-file "~/.emacs.d/custom.el")
