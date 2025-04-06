@@ -127,6 +127,9 @@
          ("C-x M-g" . magit-dispatch-popup)
          ("C-x M-b" . magit-blame)))
 
+;; elpy
+(define-key elpy-mode-map (kbd "C-c g") #'elpy-goto-definition)
+
 ;; --------------------------------------
 ;; Custom Functions
 ;; --------------------------------------
@@ -150,5 +153,4 @@
 
 (put 'downcase-region 'disabled nil)  ; Enable case commands
 (put 'upcase-region 'disabled nil)
-
 
