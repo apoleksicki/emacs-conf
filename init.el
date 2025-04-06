@@ -78,7 +78,8 @@
 (use-package hy-mode)
 
 (use-package lsp-mode
-  :hook ((python-mode . lsp))
+  :hook ((python-mode . lsp)
+         (go-mode . lsp))  ; Enable LSP for Go
   :commands lsp
   :init
   (setq lsp-keymap-prefix "C-c l"
@@ -91,8 +92,6 @@
   :ensure nil  ;; Do not try to install it from a package repository.
   :after lsp-mode
   :hook (python-mode . (lambda ()
-                         ;; If you need to require a file, check that it exists.
-                         ;; For now, we assume lsp-mode supports ruff if you set the variable.
                          (lsp)))
   :config
   (setq lsp-ruff-lsp-server-command '("ruff-lsp")))
@@ -109,7 +108,28 @@
         lsp-pylsp-plugins-rope-completion-enabled t
         lsp-pylsp-plugins-rope-refactoring-enabled t))
 
+;; --------------------------------------
+;; Go Mode Configuration
+;; --------------------------------------
 
+(use-package go-mode
+  :hook ((before-save . gofmt-before-save))
+  :config
+  (setq gofmt-command "gofmt"))
+
+(use-package company
+  :hook (go-mode . company-mode))
+
+(use-package flycheck
+  :hook (go-mode . flycheck-mode))
+
+(use-package lsp-mode
+  :hook (go-mode . lsp)
+  :commands lsp)
+
+(use-package dap-mode
+  :after lsp-mode
+  :config (require 'dap-dlv-go))
 
 ;; --------------------------------------
 ;; Keybindings
