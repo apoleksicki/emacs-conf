@@ -146,6 +146,13 @@
   :after lsp-mode
   :config (require 'dap-dlv-go))
 
+(use-package gotest
+  :after go-mode
+  :bind (:map go-mode-map
+              ("C-c C-t" . go-test-current-test)
+              ("C-c C-f" . go-test-current-file)
+              ("C-c C-p" . go-test-current-project)))
+
 ;; --------------------------------------
 ;; Keybindings
 ;; --------------------------------------
