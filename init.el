@@ -28,6 +28,21 @@
   (normal-top-level-add-subdirs-to-load-path))
 
 ;; --------------------------------------
+;; Load Environment Variables from Shell
+;; --------------------------------------
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  ;; Initializes shell environment variables (like PATH) in GUI Emacs.
+  ;; This is essential for using tools like `go`, `gopls`, etc., that
+  ;; are available in your shell but not seen by Emacs when launched from GUI.
+  (exec-path-from-shell-initialize)
+
+  ;; You can explicitly import variables you care about (optional).
+  ;; (exec-path-from-shell-copy-envs '("PATH" "GOPATH" "GOROOT"))
+)
+
+;; --------------------------------------
 ;; Basic Customization
 ;; --------------------------------------
 
