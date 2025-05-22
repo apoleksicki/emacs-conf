@@ -196,3 +196,5 @@
 (put 'downcase-region 'disabled nil)  ; Enable case commands
 (put 'upcase-region 'disabled nil)
 
+(setq mac-command-modifier 'control)
+
