@@ -78,10 +78,6 @@
   :after evil
   :config (evil-collection-init))
 
-(use-package elpy
-  :init (elpy-enable)
-  :bind ("M-*" . pop-tag-mark))
-
 (use-package flycheck
   :init (global-flycheck-mode))
 
@@ -169,8 +165,6 @@
          ("C-x M-g" . magit-dispatch-popup)
          ("C-x M-b" . magit-blame)))
 
-;; elpy
-(define-key elpy-mode-map (kbd "C-c g") #'elpy-goto-definition)
 
 ;; --------------------------------------
 ;; Custom Functions
