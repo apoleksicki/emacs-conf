@@ -1,194 +1,139 @@
-;; init.el --- Optimized Emacs Configuration
-
-;; --------------------------------------
-;; Package Management (Optimized)
-;; --------------------------------------
-
+;; ----------------------
+;; 📦 Package Setup
+;; ----------------------
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")
-                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+                         ("gnu"   . "https://elpa.gnu.org/packages/")))
 (package-initialize)
 
 (unless package-archive-contents
   (package-refresh-contents))
 
-;; Install use-package if not present
 (unless (package-installed-p 'use-package)
-  (package-refresh-contents)
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;; --------------------------------------
-;; Load Paths (Auto-Loading)
-;; --------------------------------------
-
-(let ((default-directory "~/.emacs.d/site/"))
-  (normal-top-level-add-subdirs-to-load-path))
-
-;; --------------------------------------
-;; Load Environment Variables from Shell
-;; --------------------------------------
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  ;; Initializes shell environment variables (like PATH) in GUI Emacs.
-  ;; This is essential for using tools like `go`, `gopls`, etc., that
-  ;; are available in your shell but not seen by Emacs when launched from GUI.
-  (exec-path-from-shell-initialize)
-
-  ;; You can explicitly import variables you care about (optional).
-  ;; (exec-path-from-shell-copy-envs '("PATH" "GOPATH" "GOROOT"))
-)
-
-;; --------------------------------------
-;; Basic Customization
-;; --------------------------------------
-
-(set-face-attribute 'default nil :height 150)  ; Larger font
-(global-hl-line-mode 1)                        ; Highlight current line
-(delete-selection-mode nil)                    ; Don't delete selected text on type
-(electric-pair-mode 1)                         ; Auto-pair brackets/quotes (replaces autopair)
-(global-display-line-numbers-mode 1)           ; Line numbers
-
-;; Safely load custom-file
-(setq custom-file "~/.emacs.d/custom.el")
-(when (file-exists-p custom-file)
-  (load custom-file))
-
-;; --------------------------------------
-;; Package Configuration (Using use-package)
-;; --------------------------------------
-
+;; ----------------------
+;; 🧠 Better Defaults
+;; ----------------------
 (use-package better-defaults)
 
-(use-package neotree
-  :bind ("<f8>" . neotree-toggle)
-  :config
-  (setq neo-smart-open t))
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 
-(setq evil-want-keybinding nil)  ; Critical fix for evil-collection
+(setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+(global-display-line-numbers-mode 1)
 
+;; ----------------------
+;; 😈 Evil Mode
+;; ----------------------
 (use-package evil
+  :init
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-Y-yank-to-eol t)
   :config
   (evil-mode 1))
 
-(use-package evil-collection
-  :after evil
-  :config (evil-collection-init))
+(setq evil-kill-on-visual-paste nil)
 
-(use-package flycheck
-  :init (global-flycheck-mode))
+;; ----------------------
+;; 🧠 Which Key
+;; ----------------------
+(use-package which-key
+  :config (which-key-mode))
 
-(use-package flycheck-pycheckers
-  :after flycheck
-  :config (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
-
-(use-package pyenv-mode)
-(use-package hy-mode)
-
+;; ----------------------
+;; 💻 LSP + Python + Ruff
+;; ----------------------
 (use-package lsp-mode
-  :hook ((python-mode . lsp)
-         (go-mode . lsp))  ; Enable LSP for Go
+  :hook ((python-mode . lsp))
   :commands lsp
   :init
-  (setq lsp-keymap-prefix "C-c l"
-        lsp-enable-snippet nil)  ;; Disable snippets (optional)
+  (setq lsp-keymap-prefix "C-c l")
   :config
-  (lsp-enable-which-key-integration t))
+  (setq lsp-diagnostics-provider :none))
 
-;; Enable Ruff LSP (for linting and formatting)
-(use-package lsp-ruff
-  :ensure nil  ;; Do not try to install it from a package repository.
+(use-package lsp-pyright
   :after lsp-mode
   :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
                          (lsp)))
   :config
-  (setq lsp-ruff-lsp-server-command '("ruff-lsp")))
+  (setq lsp-pyright-typechecking-mode "off"))
 
-;; Enable Python LSP Server (Pylsp) with Rope
-(use-package lsp-pylsp
-  :ensure nil  ;; Prevent use-package from trying to install a package that doesn’t exist.
-  :after lsp-mode
-  :config
-  (setq lsp-pylsp-plugins-ruff-enabled t
-        lsp-pylsp-plugins-ruff-format t
-        lsp-pylsp-plugins-mypy-enabled t
-        lsp-pylsp-plugins-black-enabled t
-        lsp-pylsp-plugins-rope-completion-enabled t
-        lsp-pylsp-plugins-rope-refactoring-enabled t))
+(defun my/python-ruff-format ()
+  "Format current buffer using ruff --fix without losing buffer edits."
+  (when (and (eq major-mode 'python-mode)
+             (executable-find "ruff"))
+    (let ((tempfile (make-temp-file "ruff" nil ".py"))
+          (current-point (point)))
+      (write-region nil nil tempfile nil 'silent)
+      (call-process "ruff" nil nil nil "--fix" tempfile)
+      (save-excursion
+        (erase-buffer)
+        (insert-file-contents tempfile))
+      (goto-char current-point))))
+(add-hook 'before-save-hook #'my/python-ruff-format)
 
-;; --------------------------------------
-;; Go Mode Configuration
-;; --------------------------------------
-
-(use-package go-mode
-  :hook ((before-save . gofmt-before-save))
-  :config
-  (setq gofmt-command "gofmt"))
-
+;; ----------------------
+;; 🔤 Company Mode
+;; ----------------------
 (use-package company
-  :hook (go-mode . company-mode))
+  :hook (after-init . global-company-mode))
 
-(use-package flycheck
-  :hook (go-mode . flycheck-mode))
+;; ----------------------
+;; 🌲 Treemacs
+;; ----------------------
+(use-package treemacs
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (setq treemacs-is-never-other-window t
+        treemacs-no-png-images t)
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-git-mode 'extended)
+  :bind
+  (:map global-map
+        ("C-x t" . treemacs)))
 
-(use-package lsp-mode
-  :hook (go-mode . lsp)
-  :commands lsp)
+(use-package treemacs-evil
+  :after (treemacs evil))
 
-(use-package dap-mode
-  :after lsp-mode
-  :config (require 'dap-dlv-go))
+(use-package treemacs-projectile
+  :after (treemacs projectile))
 
-(use-package gotest
-  :after go-mode
-  :bind (:map go-mode-map
-              ("C-c C-t" . go-test-current-test)
-              ("C-c C-f" . go-test-current-file)
-              ("C-c C-p" . go-test-current-project)))
+(use-package treemacs-magit
+  :after (treemacs magit))
 
-;; --------------------------------------
-;; Keybindings
-;; --------------------------------------
-
-;; Window navigation
-(global-set-key (kbd "M-1") 'windmove-left)
-(global-set-key (kbd "M-2") 'windmove-right)
-(global-set-key (kbd "M-3") 'windmove-up)
-(global-set-key (kbd "M-4") 'windmove-down)
-
-;; Magit (Git integration)
+;; ----------------------
+;; 🌲 Magit
+;; ----------------------
 (use-package magit
-  :bind (("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch-popup)
-         ("C-x M-b" . magit-blame)))
+  :commands magit-status
+  :config
+  (global-set-key (kbd "C-x g") #'magit-status)
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 
+;; ----------------------
+;; 🧪 Pytest Integration
+;; ----------------------
+(use-package pytest
+  :after python
+  :hook (python-mode . (lambda ()
+                         (local-set-key (kbd "C-c t a") 'pytest-all)
+                         (local-set-key (kbd "C-c t m") 'pytest-module)
+                         (local-set-key (kbd "C-c t .") 'pytest-one)
+                         (local-set-key (kbd "C-c t d") 'pytest-directory))))
 
-;; --------------------------------------
-;; Custom Functions
-;; --------------------------------------
-
-(defun inner-open-project (directory)
-  "Open a project in DIRECTORY and activate its Python environment."
-  (interactive "DOpen project: ")
-  (pyvenv-activate directory)
-  (let ((project-name (car (last (split-string directory "/")))))
-    (find-file (format "~/dev/%s/setup.py" project-name))))
-
-(defun open-project ()
-  "Interactively open a project from ~/.pyenv/versions."
-  (interactive)
-  (let ((default-directory "~/.pyenv/versions/"))
-    (call-interactively 'inner-open-project)))
-
-;; --------------------------------------
-;; Final Settings
-;; --------------------------------------
-
-(put 'downcase-region 'disabled nil)  ; Enable case commands
-(put 'upcase-region 'disabled nil)
-
-(setq mac-command-modifier 'control)
+;; ----------------------
+;; 🎨 Theme
+;; ----------------------
+(use-package gruvbox-theme
+  :config (load-theme 'gruvbox-dark-soft t))
 
