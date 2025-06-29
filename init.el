@@ -58,6 +58,14 @@
                 (when venv-path
                   (pyvenv-activate (expand-file-name ".venv" venv-path)))))))
 
+;; 🧠✨ Advanced auto-pairing with smartparens
+(use-package smartparens
+  :hook (prog-mode . smartparens-mode) ;; Enable smartparens in programming modes
+  :config
+  (require 'smartparens-config)        ;; Load default pair rules
+  ;; Optional: stricter pairs, better for lisps
+  ;; (sp-use-smartparens-bindings)
+  )
 
 ;; ----------------------
 ;; 🧠 Which Key
