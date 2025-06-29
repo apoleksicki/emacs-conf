@@ -15,6 +15,15 @@
 (setq use-package-always-ensure t)
 
 ;; ----------------------
+;; Emacs path
+;; ----------------------
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
+
+
+
+;; ----------------------
 ;; 🧠 Better Defaults
 ;; ----------------------
 (use-package better-defaults)
