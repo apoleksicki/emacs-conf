@@ -48,6 +48,17 @@
 
 (setq evil-kill-on-visual-paste nil)
 
+;; 🐍🔋 Auto pyvenv for uv
+(use-package pyvenv
+  :config
+  ;; 🚀 Automatically activate pyvenv for a project
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (let ((venv-path (locate-dominating-file default-directory ".venv")))
+                (when venv-path
+                  (pyvenv-activate (expand-file-name ".venv" venv-path)))))))
+
+
 ;; ----------------------
 ;; 🧠 Which Key
 ;; ----------------------
