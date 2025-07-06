@@ -159,6 +159,12 @@
                          (local-set-key (kbd "C-c t .") 'pytest-one)
                          (local-set-key (kbd "C-c t d") 'pytest-directory))))
 
+;; 🥒✨ Gherkin / Cucumber feature mode
+(use-package feature-mode
+  :mode ("\\.feature\\'" . feature-mode)
+  :config
+  (setq feature-indent-level 2)) ;; 2-space indent for steps
+
 ;; ----------------------
 ;; 🎨 Theme
 ;; ----------------------
