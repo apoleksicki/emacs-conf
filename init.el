@@ -47,7 +47,14 @@
   (evil-mode 1))
 
 (setq evil-kill-on-visual-paste nil)
-(define-key evil-normal-state-map (kbd "gd") #'xref-find-definitions)
+;; ----------------------
+;; 😈 Evil keybindings for xref (LSP)
+;; ----------------------
+(with-eval-after-load 'evil
+  ;; Go to definition with "gd"
+  (define-key evil-normal-state-map (kbd "gd") #'xref-find-definitions)
+  ;; Jump back with "gD"
+  (define-key evil-normal-state-map (kbd "gD") #'xref-pop-marker-stack))
 
 ;; 🐍🔋 Auto pyvenv for uv
 (use-package pyvenv
