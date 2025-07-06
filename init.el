@@ -47,6 +47,7 @@
   (evil-mode 1))
 
 (setq evil-kill-on-visual-paste nil)
+(define-key evil-normal-state-map (kbd "gd") #'xref-find-definitions)
 
 ;; 🐍🔋 Auto pyvenv for uv
 (use-package pyvenv
