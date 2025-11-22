@@ -159,13 +159,37 @@
 ;; ----------------------
 ;; 🧪 Pytest Integration
 ;; ----------------------
+
+(defun pytest-run-with-save (pytest-fn)
+  "Save unsaved buffers before running PYTEST-FN."
+  (interactive)
+  (when (save-some-buffers t)
+    (funcall pytest-fn)))
+
+(defun pytest-all-with-save ()
+  (interactive)
+  (pytest-run-with-save #'pytest-all))
+
+(defun pytest-module-with-save ()
+  (interactive)
+  (pytest-run-with-save #'pytest-module))
+
+(defun pytest-one-with-save ()
+  (interactive)
+  (pytest-run-with-save #'pytest-one))
+
+(defun pytest-directory-with-save ()
+  (interactive)
+  (pytest-run-with-save #'pytest-directory))
+
+
 (use-package pytest
   :after python
   :hook (python-mode . (lambda ()
-                         (local-set-key (kbd "C-c t a") 'pytest-all)
-                         (local-set-key (kbd "C-c t m") 'pytest-module)
-                         (local-set-key (kbd "C-c t .") 'pytest-one)
-                         (local-set-key (kbd "C-c t d") 'pytest-directory))))
+                         (local-set-key (kbd "C-c t a") #'pytest-all-with-save)
+                         (local-set-key (kbd "C-c t m") #'pytest-module-with-save)
+                         (local-set-key (kbd "C-c t .") #'pytest-one-with-save)
+                         (local-set-key (kbd "C-c t d") #'pytest-directory-with-save))))
 
 ;; 🥒✨ Gherkin / Cucumber feature mode
 (use-package feature-mode
