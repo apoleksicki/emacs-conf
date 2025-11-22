@@ -160,36 +160,27 @@
 ;; 🧪 Pytest Integration
 ;; ----------------------
 
-(defun pytest-run-with-save (pytest-fn)
-  "Save unsaved buffers before running PYTEST-FN."
-  (interactive)
-  (when (save-some-buffers t)
-    (funcall pytest-fn)))
-
-(defun pytest-all-with-save ()
-  (interactive)
-  (pytest-run-with-save #'pytest-all))
-
-(defun pytest-module-with-save ()
-  (interactive)
-  (pytest-run-with-save #'pytest-module))
-
-(defun pytest-one-with-save ()
-  (interactive)
-  (pytest-run-with-save #'pytest-one))
-
-(defun pytest-directory-with-save ()
-  (interactive)
-  (pytest-run-with-save #'pytest-directory))
-
+(defun pytest-run-with-save (fn)
+  (save-some-buffers)
+  (unless (cl-some (lambda (buf)
+                     (and (buffer-modified-p buf)
+                          (buffer-file-name buf)))
+                   (buffer-list))
+    (funcall fn)))
 
 (use-package pytest
   :after python
-  :hook (python-mode . (lambda ()
-                         (local-set-key (kbd "C-c t a") #'pytest-all-with-save)
-                         (local-set-key (kbd "C-c t m") #'pytest-module-with-save)
-                         (local-set-key (kbd "C-c t .") #'pytest-one-with-save)
-                         (local-set-key (kbd "C-c t d") #'pytest-directory-with-save))))
+  :hook
+  (python-mode . (lambda ()
+                   (dolist (pair '(("C-c t a" . pytest-all)
+                                   ("C-c t m" . pytest-module)
+                                   ("C-c t ." . pytest-one)
+                                   ("C-c t d" . pytest-directory)))
+                     (local-set-key
+                      (kbd (car pair))
+                      `(lambda ()
+                         (interactive)
+                         (pytest-run-with-save #',(cdr pair))))))))
 
 ;; 🥒✨ Gherkin / Cucumber feature mode
 (use-package feature-mode
